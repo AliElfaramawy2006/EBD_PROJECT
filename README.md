@@ -1,4 +1,4 @@
-# CampusMarket
+# Nema
 
 
 **Course:** Electronic Business Development (BINF 503) · Winter 2026
@@ -11,34 +11,35 @@
 | Ali Elfaramawy | 16002753 | T6 | AliElFaramawy2006 |
 | Omar Ahmed Saleh | 16001575 | T2 | omarsaleh24680-cyber |
 | Youssef Abdelbaset | 16001329 | T7 | youssef414 |
-| Omar Elsayed | 16002170 | T2 | omaraelsayed2006-creator |
+| Omar Elsayed | 16002710 | T2 | omaraelsayed2006-creator |
 | Mennatallah Mohamed | 16008687 | T2 | nanomoha2006-coder |
 
 
 ## 2. The idea
-CampusMarket is a web application designed for university students to buy and sell second-hand products within their university community. Students can create accounts, publish products they want to sell, browse available listings, send purchase requests, manage incoming requests, and update their personal profiles. The platform aims to provide students with an easy, affordable, and convenient way to exchange products such as textbooks, calculators, laptops, and other university essentials.
+Nema is a hyperlocal surplus food rescue marketplace designed for Egyptian university students, budget-conscious households, and local food businesses (bakeries, cafes, and supermarkets). It solves the dual real-world problems of daily commercial food waste and rising meal costs by allowing partner shops to list unsold end-of-day food bundles at 50–70% off, enabling nearby users to reserve and pick them up before closing time.
 
 
 
 ## 3. Features
 
 ### 3.1 The full product
-- **User Registration and Login:** Students can create accounts, log in securely, and manage their personal profiles.
+- **User Registration and Login:** Users and partner food businesses can create accounts and log in securely.
 
-- **Product Listings:** Students can publish products for sale, including titles, descriptions, prices, categories, and images.
+- **Business Registration and Management:** Bakeries, cafes, and supermarkets can register their businesses and manage their profiles.
 
-- **Product Browsing and Search:** Users can browse available products and search or filter them by name and category.
+- **Surplus Food Listings:** Partner businesses can publish food bundles with descriptions, discounted prices, quantities, pickup locations, and collection deadlines.
 
-- **Purchase Requests:** Students can send requests to purchase products listed by other students.
+- **Browse and Search Food Bundles:** Users can browse available food bundles and filter them by category, price, and nearby location.
 
-- **Request Management:** Sellers can view incoming purchase requests and accept or reject them.
+- **Food Bundle Reservations:** Users can reserve available food bundles and receive reservation confirmation.
 
-- **User Profiles:** Students can update their personal information and view their own published listings.
+- **Reservation Management:** Businesses can view incoming reservations and confirm or cancel them.
 
-- **Product Availability Management:** Sellers can update product availability when an item is sold or no longer available.
+- **Pickup and Order Status:** Users and businesses can track reservation status, including reserved, ready for pickup, and collected.
 
-- **Future Features:** The platform could eventually include in-app messaging, notifications, online payments, and delivery tracking.
- 
+- **Future Features:** The platform could eventually include online payments, push notifications, ratings and reviews, and personalized food recommendations.
+
+
 
 
 
@@ -47,81 +48,179 @@ CampusMarket is a web application designed for university students to buy and se
 
 | # | Use case | What the user does | What they see | What is stored |
 |---|---|---|---|---|
-| 1 | Registration and login | Registers with name, email and password; logs in with email and password | Their home page, with their name in the header | A User, with the password hashed |
-| 2 | Manage Product Listings | Creates, edits, and deletes product listings with a title, description, price, and category | A list of their published products and confirmation of changes | Listing documents containing product details and seller ID |
-| 3 | Browse Products and Send Purchase Requests | Browses available products, views product details, and sends a request to buy a product | Available products, product details, and confirmation that the request was submitted | PurchaseRequest document containing buyer ID, seller ID, listing ID, and request status |
-| 4 | Manage Purchase Requests | Views incoming requests and accepts or rejects purchase requests | A list of incoming requests with their updated statuses | Updated PurchaseRequest documents with accepted or rejected status |
-| 5 | Manage User Profile | Views and updates personal information and can delete their account | Their profile information and confirmation of successful updates or account deletion | Updated or deleted User document containing name, email, and password hash |
+| 1 | Registration and Login | Creates an account using name, email, and password, or logs in using existing credentials | Their personalized home page with their name and account information | A User document containing name, email, and securely hashed password |
+| 2 | Manage Food Listings | A registered business creates, edits, or deletes surplus food bundles with descriptions, prices, quantities, and pickup deadlines | A list of published food bundles and confirmation of successful changes | FoodListing documents containing bundle details, business ID, and availability status |
+| 3 | Browse Food Bundles and Make Reservations | Browses nearby available food bundles, views details, and reserves a bundle | Available bundles, discounted prices, pickup locations, and reservation confirmation | A Reservation document containing user ID, listing ID, quantity, and reservation status |
+| 4 | Manage Reservations and Pickup Status | A business views incoming reservations, confirms or cancels them, and updates orders as ready for pickup or collected | A list of reservations with their current statuses | Updated Reservation documents containing confirmation and pickup status |
+| 5 | Manage User and Business Profiles | Users and businesses view and update their profile information and can delete their accounts | Their updated profile information and confirmation of successful changes | Updated or deleted User and Business documents |
+
 
 ## 4. Who owns what
 
 | Member | Use case |
 |---|---|
-| Omar Elsayed | 1. Registration and login |
-| Ali Elfaramawy | 2. Manage Product Listings |
-| Mennatallah Mohamed | 3. Browse Products and Send Purchase Requests |
-| Youssef Abdelbaset | 4. Manage Purchase Requests |
-| Omar Ahmed Saleh | 5. Manage User Profile |
+| Omar Elsayed | 1. Registration and Login |
+| Ali Elfaramawy | 2. Manage Food Listings |
+| Mennatallah Mohamed | 3. Browse Food Bundles and Make Reservations |
+| Youssef Abdelbaset | 4. Manage Reservations and Pickup Status |
+| Omar Ahmed Saleh | 5. Manage User and Business Profiles |
 
 ## 5. Data model
 
+```js
+const mongoose = require('mongoose');
+```
+
 ### User
-
-
 ```js
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // stored hashed, never as plain text
-});
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['CUSTOMER', 'BUSINESS'],
+    default: 'CUSTOMER'
+  }
+}, { timestamps: true });
 ```
-### Listing
+
+### Business
 
 ```js
-const listingSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  price: { type: Number, required: true, min: 0 },
-  category: { type: String, required: true },
-  image: { type: String },
-  seller: {
+const businessSchema = new mongoose.Schema({
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
+  businessName: {
+    type: String,
+    required: true
+  },
+  category: {
+    type: String,
+    enum: ['BAKERY', 'CAFE', 'SUPERMARKET', 'OTHER'],
+    required: true
+  },
+  address: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  }
+}, { timestamps: true });
+```
+
+### FoodListing
+
+```js
+const foodListingSchema = new mongoose.Schema({
+  business: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Business',
+    required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  category: {
+    type: String,
+    required: true
+  },
+  originalPrice: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  discountedPrice: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  quantityAvailable: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  pickupAddress: {
+    type: String,
+    required: true
+  },
+  pickupDeadline: {
+    type: Date,
+    required: true
+  },
   status: {
     type: String,
-    enum: ['AVAILABLE', 'SOLD'],
+    enum: ['AVAILABLE', 'SOLD_OUT', 'EXPIRED'],
     default: 'AVAILABLE'
   }
 }, { timestamps: true });
 ```
-### PurchaseRequest
+
+### Reservation
 
 ```js
-const purchaseRequestSchema = new mongoose.Schema({
-  buyer: {
+const reservationSchema = new mongoose.Schema({
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  seller: {
+  business: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Business',
     required: true
   },
-  listing: {
+  foodListing: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Listing',
+    ref: 'FoodListing',
     required: true
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+    min: 0
   },
   status: {
     type: String,
-    enum: ['PENDING', 'ACCEPTED', 'REJECTED'],
+    enum: [
+      'PENDING',
+      'CONFIRMED',
+      'CANCELLED',
+      'READY_FOR_PICKUP',
+      'COLLECTED'
+    ],
     default: 'PENDING'
   }
 }, { timestamps: true });
 ```
+
+
+
 
 ## 6. Run it locally
 
